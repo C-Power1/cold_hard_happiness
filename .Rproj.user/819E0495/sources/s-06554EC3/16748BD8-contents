@@ -1,0 +1,1517 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(readxl)
+library(glue)
+library(httr)
+library(RSelenium)
+```
+
+```{r}
+read_csv("events.csv")
+```
+
+
+Get Live text commentary - ESPN
+
+```{r}
+
+    espn_url <- "https://www.espn.co.uk/football/commentary?gameId=447042"
+    espn_webpage <- read_html(espn_url)
+    
+    espn_commentary <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .game-details") %>% 
+      html_text() %>% 
+      str_remove_all("\n    \t") %>% 
+      str_remove_all("\n    ")
+    
+    espn_mins <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .time-stamp") %>% 
+      html_text() 
+    
+    espn_home_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .home .team-name") %>% 
+      html_text() 
+      
+    espn_away_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .away .team-name") %>% 
+      html_text() 
+    
+    espn_com_tibble <- tibble(espn_commentary, espn_mins, espn_home_team_name, espn_away_team_name) %>% 
+      mutate(espn_mins = str_remove_all(espn_mins, "'")) %>% 
+      rename(mins = espn_mins) %>% 
+      mutate()
+    
+    
+    
+```
+
+first season
+```{r}
+first_season <- read_excel("2015-2016v5.xlsx") %>%
+  mutate(url_text_comm = gsub("[[:punct:]]", "", url_text_comm)) %>%
+  mutate(url_text_comm = gsub("\\E+[0-9]", "", url_text_comm)) %>% 
+  mutate(id = 1:length(url_text_comm))
+
+first_season_split <- first_season %>% 
+ slice(1:5)
+
+first_season_split2 <- first_season %>% 
+ slice(6:10)
+
+first_season_split3 <- first_season %>% 
+slice(11:20)
+
+first_season_split4 <- first_season %>% 
+slice(21:35)
+
+first_season_split5 <- first_season %>% 
+slice(36:55)
+
+first_season_split6 <- first_season %>% 
+slice(56:80)
+
+first_season_split7 <- first_season %>% 
+slice(81:100)
+
+first_season_split8 <- first_season %>% 
+slice(101:121) %>% 
+  mutate(url_text_comm = ifelse(url_text_comm == "35201468", "35166006" , url_text_comm))
+
+first_season_split9 <- first_season %>% 
+slice(122:150)
+
+first_season_split10 <- first_season %>% 
+slice(151:180)
+
+first_season_split11 <- first_season %>% 
+slice(181:200)
+
+first_season_split12 <- first_season %>% 
+slice(201:233)
+```
+
+second season
+
+```{r}
+    url_fixtures <- "https://www.skysports.com/scottish-premier-results/2016-17"
+    webpage_fixtures <- read_html(url_fixtures)
+    
+    home_team_fixtures <- webpage_fixtures %>%
+      html_nodes(".matches__participant--side1 .swap-text__target") %>% 
+      str_remove_all('<span class=\"swap-text__target\">') %>% 
+      str_remove_all('</span>')
+    
+     away_team_fixtures <- webpage_fixtures %>%
+      html_nodes(".matches__participant--side2 .swap-text__target") %>% 
+      str_remove_all('<span class=\"swap-text__target\">') %>% 
+      str_remove_all('</span>')
+     
+     scores <- webpage_fixtures %>%
+      html_nodes(".matches__status") %>% 
+       str_remove_all('[:alpha:]') %>% 
+       str_remove_all('[:punct:]') %>% 
+       str_remove_all('[:space:]') %>% 
+       str_remove_all('<><><=>[0-9]+[0-9]+[0-9]+[0-9]<><>') %>% 
+       str_remove_all('<=><=><=>') %>% 
+       str_replace_all('<><=>', '-')
+     
+    fixtures_sky <-  tibble(home_team_fixtures, away_team_fixtures, scores)
+    
+    write_csv(fixtures_sky, "2016-17_fixtures.csv")
+
+```
+
+create function for ESPN commentary
+
+```{r}
+get_commentary <- function(url = url_text_comm){
+  
+   input <- paste0(url)
+   espn_webpage <- read_html(input)
+   
+   # scrape data
+   
+    espn_commentary <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .game-details") %>% 
+      html_text() %>% 
+      str_remove_all("\n    \t") %>% 
+      str_remove_all("\n    ")
+    
+    espn_mins <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .time-stamp") %>% 
+      html_text() 
+    
+    espn_com_tibble <- tibble(espn_commentary, espn_mins) %>% 
+      mutate(espn_mins = str_remove_all(espn_mins, "'")) %>% 
+      rename(mins = espn_mins)
+   
+}
+```
+
+Get Live text commentary - Goal.com
+
+```{r}
+
+    goal_com_url <- "https://www.goal.com/en/match/aberdeen-v-ross-county/23kgi4xpt3coytll9tyxvx9ex"
+    goal_com_webpage <- read_html(goal_com_url)
+    
+    goal_com_commentary <- goal_com_webpage %>%
+      html_nodes(".text") %>% 
+      html_text()
+    
+    goal_com_mins <- goal_com_webpage %>% 
+      html_nodes(".time") %>% 
+      html_text()
+      
+    goal_com_tibble <-  tibble(goal_com_commentary) %>% 
+      head(length(goal_com_commentary)-1)
+  
+    goal_com_tibble <- tibble(goal_com_tibble, goal_com_mins) %>% 
+      mutate(goal_com_mins = str_remove_all(goal_com_mins, "'")) %>% 
+      rename(mins = goal_com_mins)
+    
+
+```
+
+Get Live text commentary - bbc
+
+```{r}
+bbc_url <- "https://www.bbc.co.uk/sport/football/35330974"
+    bbc_webpage <- read_html(bbc_url)
+    
+    bbc_commentary <- bbc_webpage %>%
+      html_nodes("p") %>%
+      html_text() 
+    
+        page_identify <- bbc_webpage %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-pagination__details gs-u-ph qa-pagination-details')]") %>% 
+  rvest::html_text() %>% 
+          str_remove_all("Page 1 of ") %>% 
+          as.numeric()
+ 
+```
+
+Get fixtures 2015-2016
+
+```{r}
+    url_fixtures <- "https://www.sportsmole.co.uk/football/scottish-premiership/2015-16/results.html"
+    webpage_fixtures <- read_html(url_fixtures)
+    
+    home_team_fixtures <- webpage_fixtures %>%
+      html_nodes(".l_sfp_two") %>% 
+      html_text()
+    
+    away_team_fixtures <- webpage_fixtures %>%
+      html_nodes(".l_sfp_four") %>% 
+      html_text()
+    
+    date_fixtures <- webpage_fixtures %>%
+      html_nodes(".fixres__header2") %>% 
+      html_text()
+    
+  tibble(home_team_fixtures, away_team_fixtures) %>% 
+     write_excel_csv("2015-2016.csv")
+```
+
+scores
+```{r}
+    url_scores <- "https://www.sportsmole.co.uk/football/scottish-premiership/2015-16/results.html"
+    webpage_scores <- read_html(url_scores)
+    
+    scores <- webpage_scores %>% 
+      html_nodes(".l_sfp_three") %>% 
+      html_text()
+    
+    fixtures_df <- tibble(home_team_fixtures, away_team_fixtures)
+
+```
+
+create function for ESPN commentary
+
+```{r}
+get_commentary <- function(x){
+  
+   input <- glue(x)
+   espn_webpage <- read_html(input)
+   
+   # scrape data
+   
+    espn_commentary <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .game-details") %>% 
+      html_text() %>% 
+      str_remove_all("\n    \t") %>% 
+      str_remove_all("\n    ")
+    
+    espn_mins <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .time-stamp") %>% 
+      html_text()
+    
+    espn_home_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .home .team-name") %>% 
+      html_text() 
+      
+    espn_away_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .away .team-name") %>% 
+      html_text() 
+    
+    Sys.sleep(5)
+    
+    espn_com_tibble <- tibble(espn_commentary, espn_mins, espn_home_team_name, espn_away_team_name) %>% 
+      mutate(espn_mins = str_remove_all(espn_mins, "'")) %>% 
+      rename(mins = espn_mins)
+   }
+```
+
+
+<!-- RSelenium --> works with one game at a time
+
+```{r}
+
+
+rD <- rsDriver(browser="chrome", port=7336L, verbose=F, chromever = "87.0.4280.88")
+remDr <- rD[["client"]]
+
+# Goes to match page 
+
+get_bbc_commentary <- function(remDr, game_id){
+
+remDr$navigate(glue("https://www.bbc.co.uk/sport/football/{game_id}"))
+
+# Creates function to get html file
+
+get_html <- function(remDr){
+  
+remDr$getPageSource() %>% 
+    .[[1]] %>%
+    read_html()
+}
+
+
+get_team_names <- function(remDr){ 
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//span[contains(@class, 'gs-u-display-none gs-u-display-block@m qa-full-team-name sp-c-fixture__team-name-trunc')]") %>% 
+  rvest::html_text() %>% 
+          tibble() %>% 
+         head(2) %>%
+        rename(teams = 1) %>% 
+          mutate(home_team = .[1,],
+                 away_team = .[2,]) %>% 
+          unnest(c(home_team, away_team)) %>% 
+          select(-teams) %>% 
+          head(1)
+}
+
+home_and_away <- get_team_names(remDr)
+
+Sys.sleep(5)
+
+# Clicks on "Live Text" tab
+web_element <- remDr$findElement(using = "link text", value = "Live Text")
+
+web_element$clickElement()
+
+Sys.sleep(5)
+  
+# Extracts commentary text (1st Page)
+extract_commentary <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-stream-post-body')]") %>% 
+  rvest::html_text()
+}
+
+page_one_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (1st Page)
+
+extract_time <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//time[contains(@class, 'lx-stream-post__meta-time gs-u-align-middle gs-u-display-inline-block gs-u-mr0@m gs-u-mr gel-long-primer qa-post-manual-meta')]") %>% 
+  rvest::html_text() %>% 
+          tibble() %>% 
+          rename(time = 1) %>% 
+          mutate(time = str_remove_all(pattern = "'", string = time)) %>% 
+          mutate(time = gsub("[[:punct:]]", " ", time)) %>% 
+          mutate(time = gsub("\\s+[0-9]", "", time))
+}
+
+page_one_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+# Goes to page 2
+
+web_element2 <- remDr$findElement(using = "class name", value = "gel-icon--next")
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (2nd Page)
+
+page_two_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (2nd Page)
+
+page_two_bbc_time <- extract_time(remDr)
+  
+# Goes to page 3
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+# Goes to page 4
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr) 
+
+# Goes to page 5
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (5th Page)
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+  
+# Extracts time (5th Page)
+
+page_five_bbc_time <- extract_time(remDr)
+
+# Page identifier
+
+page_num <-  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-pagination__details gs-u-ph qa-pagination-details')]") %>% 
+  rvest::html_text() %>%
+    tibble() %>%
+  rename(page = 1) %>% 
+  head(1) %>% 
+          mutate(page = str_remove_all(page, pattern = "Page [0-9] of ")) %>% 
+  mutate(page = as.numeric(page))
+
+
+page_6_scenario <- if(page_num == 6){
+      Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (6th Page)
+
+page_six_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (6th Page)
+
+page_six_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+commentary_tibble <- rbind(page_six_bbc,
+                               page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_six_bbc_time,
+                               page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+    }else{
+
+Sys.sleep(5)
+
+commentary_tibble <- rbind(page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+    }
+}
+
+
+
+celtic_test <- get_bbc_commentary(remDr = remDr, game_id = "35330974")
+# 
+# killie_test <- get_bbc_commentary(remDr = remDr, game_id = "53871818")
+# 
+# five_page_test <- get_bbc_commentary(remDr = remDr, game_id = "53871820")
+
+
+# remDr$close()
+# rD$server$stop()
+```
+
+
+```{r}
+get_html <- function(remDr){
+  
+remDr$getPageSource() %>% 
+    .[[1]] %>%
+    read_html()
+}
+
+get_team_names <- function(remDr){ 
+  
+get_team_names1 <- remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//span[contains(@class, 'gs-u-display-none gs-u-display-block@m qa-full-team-name sp-c-fixture__team-name-trunc')]") %>% 
+  rvest::html_text() 
+
+get_team_names1[1:2]
+}
+
+extract_commentary <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-stream-post-body')]") %>% 
+  rvest::html_text()
+}
+
+extract_time <- function(remDr){
+  
+extract_time1 <- 
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//time[contains(@class, 'lx-stream-post__meta-time gs-u-align-middle gs-u-display-inline-block gs-u-mr0@m gs-u-mr gel-long-primer qa-post-manual-meta')]") %>% 
+  rvest::html_text() %>%
+  str_remove_all(pattern = "'") 
+
+extract_time1[extract_time1 != ""]
+}
+
+
+rD <- rsDriver(browser="chrome", port=5956L, verbose=F, chromever = "87.0.4280.88")
+remDr <- rD[["client"]]
+
+empty_tibble <- tibble()
+
+game_id1s <- first_season_split$url_text_comm
+```
+
+
+Functions and remDr
+
+```{r}
+
+rD <- rsDriver(browser="chrome", port=4364L, verbose=F, chromever = "87.0.4280.88")
+remDr <- rD[["client"]]
+
+get_html <- function(remDr){
+  
+remDr$getPageSource() %>% 
+    .[[1]] %>%
+    read_html()
+}
+
+
+get_team_names <- function(remDr){ 
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//span[contains(@class, 'gs-u-display-none gs-u-display-block@m qa-full-team-name sp-c-fixture__team-name-trunc')]") %>% 
+  rvest::html_text() %>% 
+          tibble() %>% 
+         head(2) %>%
+        rename(teams = 1) %>% 
+          mutate(home_team = .[1,],
+                 away_team = .[2,]) %>% 
+          unnest(c(home_team, away_team)) %>% 
+          select(-teams) %>% 
+          head(1)
+}
+
+extract_commentary <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-stream-post-body')]") %>% 
+  rvest::html_text()
+}
+
+
+extract_time <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//time[contains(@class, 'lx-stream-post__meta-time gs-u-align-middle gs-u-display-inline-block gs-u-mr0@m gs-u-mr gel-long-primer qa-post-manual-meta')]") %>% 
+  rvest::html_text() %>% 
+          tibble() %>% 
+          rename(time = 1) %>% 
+          mutate(time = str_remove_all(pattern = "'", string = time)) %>% 
+          mutate(time = gsub("[[:punct:]]", " ", time)) %>% 
+          mutate(time = gsub("\\s+[0-9]", "", time))
+}
+
+page_num <-  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-pagination__details gs-u-ph qa-pagination-details')]") %>% 
+  rvest::html_text() %>%
+    tibble() %>%
+  rename(page = 1) %>% 
+  head(1) %>% 
+          mutate(page = str_remove_all(page, pattern = "Page [0-9] of ")) %>% 
+  mutate(page = as.numeric(page))
+```
+
+multi game attempt
+
+```{r}
+
+game_id1s <- first_season_split12$url_text_comm
+
+blank_list <- list()
+
+for (game_id1 in game_id1s){
+  
+  Sys.sleep(4)
+  
+  remDr$navigate(paste0("https://www.bbc.co.uk/sport/football/", game_id1))
+  
+  Sys.sleep(4)
+  
+  remDr$refresh()
+
+home_and_away <- get_team_names(remDr)
+
+Sys.sleep(5)
+
+# Clicks on "Live Text" tab
+web_element <- remDr$findElement(using = "link text", value = "Live Text")
+
+web_element$clickElement()
+
+Sys.sleep(5)
+  
+# Extracts commentary text (1st Page)
+
+page_one_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (1st Page)
+
+page_one_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+# Goes to page 2
+
+web_element2 <- remDr$findElement(using = "class name", value = "gel-icon--next")
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (2nd Page)
+
+page_two_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% 
+  tibble()
+
+# Extracts time (2nd Page)
+
+page_two_bbc_time <- extract_time(remDr)
+
+
+# Page identifier
+
+page_num <-  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-pagination__details gs-u-ph qa-pagination-details')]") %>% 
+  rvest::html_text() %>%
+str_remove_all(pattern = "Page [0-9] of ") %>% 
+  as.numeric()
+
+page_3_scenario <- if(page_num == 3){
+      Sys.sleep(5)
+  
+# Goes to page 3
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev() %>% tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+commentary_tibble <- rbind(page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+    }else if(page_num == 4){
+      
+      
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+commentary_tibble <- rbind(page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+}else if (page_num == 5){
+            
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (5th Page)
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (5th Page)
+
+page_five_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+
+commentary_tibble <- rbind(page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+
+}else if (page_num == 6){
+            
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (5th Page)
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (5th Page)
+
+page_five_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (6th Page)
+
+page_six_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (6th Page)
+
+page_six_bbc_time <- extract_time(remDr)
+
+
+commentary_tibble <- rbind(page_six_bbc, page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_six_bbc_time, page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+
+}else if (page_num == 7){
+            
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (5th Page)
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (5th Page)
+
+page_five_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (6th Page)
+
+page_six_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (6th Page)
+
+page_six_bbc_time <- extract_time(remDr)
+
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (7th Page)
+
+page_seven_bbc <- extract_commentary(remDr) %>% 
+  rev()%>% tibble()
+
+# Extracts time (7th Page)
+
+page_seven_bbc_time <- extract_time(remDr)
+
+
+commentary_tibble <- rbind(page_seven_bbc, page_six_bbc, page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc) %>% 
+  rename(commentary_text = 1) %>% 
+  drop_na() %>% 
+  head(-2) %>% 
+  tail(-2)
+
+
+time_tibble <- rbind(page_seven_bbc_time, page_six_bbc_time, page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% 
+  mutate(time = as.numeric(time)) %>%
+  drop_na() %>% 
+  mutate(time = sort(time, decreasing = F)) %>% 
+  mutate(time = as.character(time))
+
+bbc_commentary_tibble <- tibble(commentary_tibble, time_tibble, home_and_away)
+}
+  
+print(paste("game_id is", game_id1))
+blank_list[[game_id1]] <- bbc_commentary_tibble
+wow12 <- bind_rows(blank_list) 
+}
+
+# remDr$close()
+# rD$server$stop()
+
+```
+
+```{r}
+# COMPLETED
+# one_to_five <- wow
+# six_to_ten <- wow2          
+# eleven_to_twenty <- wow3
+# twentyone_to_thirtyfive <- wow4
+
+# write_excel_csv(one_to_five, "one_to_five.csv")
+# write_excel_csv(six_to_ten, "six_to_ten.csv")
+# write_excel_csv(eleven_to_twenty, "eleven_to_twenty.csv")
+# write_excel_csv(twentyone_to_thirtyfive, "twentyone_to_thirtyfive.csv")
+
+# TO DO
+
+write_excel_csv(`201-233`, "201-233.csv")
+
+eightyone_to_hundred <- wow7
+
+`101-121`<- wow8
+
+`122-150`<- wow9
+
+`151-180` <- wow10
+
+`181-200` <- wow11
+
+`201-233` <- wow12
+
+
+
+```
+
+Works but need to work with multi games
+
+```{r}
+  remDr$navigate(paste0("https://www.bbc.co.uk/sport/football/36234787"))
+  
+  Sys.sleep(4)
+  
+  remDr$refresh()
+
+
+home_and_away <- get_team_names(remDr)
+
+Sys.sleep(5)
+
+# Clicks on "Live Text" tab
+web_element <- remDr$findElement(using = "link text", value = "Live Text")
+
+web_element$clickElement()
+
+Sys.sleep(5)
+  
+# Extracts commentary text (1st Page)
+
+
+page_one_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+# Extracts time (1st Page)
+
+
+page_one_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+# Goes to page 2
+
+web_element2 <- remDr$findElement(using = "class name", value = "gel-icon--next")
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (2nd Page)
+
+page_two_bbc <- extract_commentary(remDr) %>% 
+  rev() 
+
+# Extracts time (2nd Page)
+
+page_two_bbc_time <- extract_time(remDr)
+  
+# Goes to page 3
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (3rd Page)
+
+page_three_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+# Extracts time (3rd Page)
+
+page_three_bbc_time <- extract_time(remDr)
+
+
+# Page identifier
+
+page_num <-  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-pagination__details gs-u-ph qa-pagination-details')]") %>% 
+  rvest::html_text() %>%
+str_remove_all(pattern = "Page [0-9] of ") %>% 
+  as.numeric()
+
+page_4_scenario <- if(page_num == 4){
+      Sys.sleep(5)
+  
+# Goes to page 4
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+  commentary_together <- rbind(page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc)
+  
+    commentary_together <-   commentary_together[!is.na(commentary_together)] %>%
+      head(-2)%>%
+      tail(-2)
+
+time_together <- rbind(page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% as.numeric()
+
+time_together <-  time_together[!is.na(time_together)] %>% 
+  sort(decreasing = F) %>% 
+  as.character()
+  
+
+bbc_commentary_tibble <- rbind(empty_tibble, tibble(commentary_together, time_together, home_and_away))
+    }else if(page_num == 5){
+      
+      
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+page_five_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+  commentary_together <- rbind(page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc)
+  
+    commentary_together <-   commentary_together[!is.na(commentary_together)] %>%
+      head(-2)%>%
+      tail(-2)
+
+time_together <- rbind(page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% as.numeric()
+
+time_together <-  time_together[!is.na(time_together)] %>% 
+  sort(decreasing = F) %>% 
+  as.character()
+  
+
+bbc_commentary_tibble <- rbind(empty_tibble, tibble(commentary_together, time_together, home_and_away))
+
+}else if (page_num == 6){
+            
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+# Extracts commentary text (4th Page)
+
+page_four_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+# Extracts time (4th Page)
+
+page_four_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+
+page_five_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+page_five_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+web_element2$clickElement()
+
+Sys.sleep(5)
+
+
+page_six_bbc <- extract_commentary(remDr) %>% 
+  rev()
+
+page_six_bbc_time <- extract_time(remDr)
+
+Sys.sleep(5)
+
+
+  commentary_together <- rbind(page_six_bbc, page_five_bbc,
+                               page_four_bbc,
+                               page_three_bbc,
+                               page_two_bbc,
+                               page_one_bbc)
+  
+    commentary_together <-   commentary_together[!is.na(commentary_together)] %>%
+      head(-2)%>%
+      tail(-2)
+
+time_together <- rbind(page_six_bbc_time, page_five_bbc_time,
+                               page_four_bbc_time,
+                               page_three_bbc_time,
+                               page_two_bbc_time,
+                               page_one_bbc_time) %>% as.numeric()
+
+time_together <-  time_together[!is.na(time_together)] %>% 
+  sort(decreasing = F) %>% 
+  as.character()
+  
+
+bbc_commentary_tibble <- rbind(empty_tibble, tibble(commentary_together, time_together))
+
+}
+```
+
+
+List attempt for multi games
+
+
+```{r}
+get_html <- function(remDr){
+  
+remDr$getPageSource() %>% 
+    .[[1]] %>%
+    read_html()
+}
+
+get_team_names <- function(remDr){ 
+  
+get_team_names1 <- remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//span[contains(@class, 'gs-u-display-none gs-u-display-block@m qa-full-team-name sp-c-fixture__team-name-trunc')]") %>% 
+  rvest::html_text() 
+
+get_team_names1[1:2]
+}
+
+extract_commentary <- function(remDr){
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//div[contains(@class, 'lx-stream-post-body')]") %>% 
+  rvest::html_text()
+}
+
+extract_time <- function(remDr){
+  
+extract_time1 <- 
+  
+  remDr %>% get_html(.) %>% 
+  rvest::html_nodes('body') %>% 
+  xml2::xml_find_all("//time[contains(@class, 'lx-stream-post__meta-time gs-u-align-middle gs-u-display-inline-block gs-u-mr0@m gs-u-mr gel-long-primer qa-post-manual-meta')]") %>% 
+  rvest::html_text() %>%
+  str_remove_all(pattern = "'") 
+
+extract_time1[extract_time1 != ""]
+}
+
+
+rD <- rsDriver(browser="chrome", port=5956L, verbose=F, chromever = "87.0.4280.88")
+remDr <- rD[["client"]]
+
+empty_tibble <- tibble()
+
+game_id1s <- first_season_split$url_text_comm
+
+```
+
+
+```{r}
+get_commentary <- function(x){
+  
+   input <- glue(x)
+   espn_webpage <- read_html(input)
+   
+   # scrape data
+   
+    espn_commentary <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .game-details") %>% 
+      html_text() %>% 
+      str_remove_all("\n    \t") %>% 
+      str_remove_all("\n    ")
+    
+    espn_mins <- espn_webpage %>%
+      html_nodes("#match-commentary-1-tab-1 .time-stamp") %>% 
+      html_text()
+    
+    espn_home_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .home .team-name") %>% 
+      html_text() 
+      
+    espn_away_team_name <- espn_webpage %>%
+      html_nodes("#gamepackage-soccer-timeline .away .team-name") %>% 
+      html_text() 
+    
+    Sys.sleep(5)
+    
+    espn_com_tibble <- tibble(espn_commentary, espn_mins, espn_home_team_name, espn_away_team_name) %>% 
+      mutate(espn_mins = str_remove_all(espn_mins, "'")) %>% 
+      rename(mins = espn_mins)
+}
+
+
+
+
+
+
+```
+
+```{r}
+
+rD <- rsDriver(browser="chrome", port=5364L, verbose=F, chromever = "87.0.4280.88")
+remDr <- rD[["client"]]
+
+missing_games <- read_excel("miscellaneous.xlsx")
+
+urls <- missing_games$url_text_comm
+
+url <- "https://tv5.espn.com/football/match?gameId=448681"
+
+blank_list <- list()
+
+
+  
+  Sys.sleep(4)
+  
+  remDr$navigate(paste0(url))
+  
+  Sys.sleep(4)
+  
+  remDr$refresh()
+  
+  Sys.sleep(4)
+    
+  remDr$refresh()
+  
+  Sys.sleep(4)
+  
+fal_kil_1_0 <- get_commentary(url)
+  
+  Sys.sleep(4)
+  
+print(paste("game_id is", url))
+blank_list[[url]] <- espn_commentary_tibble
+wow <- bind_rows(blank_list) 
+}
+```
+
+```{r}
+`1_to_5` <- read_csv("one_to_five.csv")
+`6_to_10` <- read_csv("six_to_ten.csv")
+`11-20` <- read_csv("eleven_to_twenty.csv")
+`21-35` <- read_csv("twentyone_to_thirtyfive.csv")
+`36-55` <- read_csv("thirtysix_to_fiftyfive.csv")
+`56-80` <- read_csv("fiftysix_to_eighty.csv")
+`81-100` <- read_csv("feightyone_to_hundred.csv")
+`101-121` <- read_csv("101-121.csv")
+`122-150` <- read_csv("122-150.csv")
+`151-180` <- read_csv("151-180.csv")
+`181-200` <- read_csv("181-200.csv")
+`201-233` <- read_csv("201-233.csv")
+
+`2015-2016` <- bind_rows(`1_to_5`,
+          `6_to_10`,
+          `11-20`,
+          `21-35`,
+          `36-55`,
+          `56-80`,
+          `81-100`,
+          `101-121`,
+          `122-150`,
+          `151-180`,
+          `181-200`,
+          `201-233`)
+
+```
+
+
+
+
+

@@ -1,0 +1,510 @@
+library(tidyverse)
+read_csv("bi-interview-exercise-icecream.csv")
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+icecream_data
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+icecream_data
+icecream_data
+icecream_data %>%
+distinct(search_term)
+icecream_data
+icecream_data %>%
+distinct(brand)
+icecream_data %>%
+distinct(search_term)
+icecream_data
+icecream_data %>%
+distinct(date)
+icecream_data %>%
+distinct(brand)
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+icecream_data %>%
+distinct(brand) %>%
+sort()
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+icecream_data %>%
+distinct(brand) %>%
+sort(decreasing = T)
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+icecream_data %>%
+distinct(brand) %>%
+sort()
+icecream_data %>%
+distinct(brand)
+icecream_data %>%
+distinct(brand)
+brands <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+brands
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T, yes = thing , no = brand))
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T, yes = "thing" , no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & product_name %in% brands_list, yes = "thing" , no = brand))
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+brands_list
+icecream_data %>%
+distinct(product_name)
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+icecream_data %>%
+group_by(product_name) %>%
+summarise(n())
+icecream_data %>%
+group_by(product_name) %>%
+summarise(n())
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+icecream_data %>%
+group_by(product_name) %>%
+summarise(n()) %>%
+sort(decreasing = T)
+icecream_data %>%
+group_by(product_name) %>%
+summarise(n()) %>%
+sort(decreasing = T)
+icecream_data %>%
+group_by(product_name) %>%
+count(sort = T)
+icecream_data %>%
+group_by(product_name) %>%
+count(sort = T) %>%
+tail(10)
+icecream_data %>%
+na.omit(product_name)
+icecream_data
+icecream_data %>%
+any(is.na(product_name))
+icecream_data
+icecream_data %>%
+any(is.na(product_name))
+any(is.na(icecream_data$product_name))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+list()
+brands_list
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & str_detect(product_name, pattern = brands_list) %in% brands_list, yes = "thing" , no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+brands_list
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & str_detect(product_name, pattern = brands_list) %in% brands_list, yes = "thing" , no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+vector()
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.vector()
+brands_list
+icecream_data %>%
+separate_rows(brand)
+icecream_data %>%
+separate_rows(product_name) %>%
+summarise(unmatched = any(!product_name %in% brands_list))
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(product_name %in% brands_list), yes = "thing" , no = brand))
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list), yes = "thing" , no = brand))
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+icecream_data
+icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+find(any(!product_name %in% brands_list))
+find(any(!icecream_data, product_name %in% brands_list))
+find(any(!icecream_data$product_name %in% brands_list)))
+find(any(!icecream_data$product_name %in% brands_list))
+any(!icecream_data$product_name %in% brands_list))
+any(!icecream_data$product_name %in% brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+library(tidyverse)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = any(!product_name %in% brands_list),
+no = brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name %in% brands_list,
+no = brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+!product_name %in% brands_list
+icecream_data %>%
+!product_name %in% brands_list
+icecream_data
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+library(tidyverse)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+distinct(search_term)
+icecream_data %>%
+distinct(retailer)
+icecream_data %>%
+na.omit(product_name)
+any(is.na(icecream_data$product_name))
+any(is.na(icecream_data$product_name))
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+icecream_data %>%
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = brands_list,
+no = brand))
+fix_brand_column
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = product_name,
+no = brand))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & any(!product_name %in% brands_list),
+yes = str_extract_all(brands_list),
+no = brand)) %>%
+mutate(brand = )
+regexpr.1 <- regexpr("Oh+", c("O my gosh!", "Oh wow!", "Ohhhhh no!"))
+regexpr.1
+string <- c("100 this is 100 test 100 string")
+temp <- unlist(strsplit(string, split = "\\s+"))
+temp
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>% list()
+temp <- unlist(strsplit(brands_list, split = "\\s+"))
+string <- c("100 this is 100 test 100 string")
+temp <- unlist(strsplit(string, split = "\\s+"))
+temp
+brands_list
+product_list <- icecream_data %>%
+distinct(product_name) %>%
+drop_na() %>% list()
+product_list
+product_list <- icecream_data %>%
+distinct(product_name) %>%
+drop_na() %>% list()
+string <- c("100 this is 100 test 100 string")
+temp <- unlist(strsplit(product_list, split = "\\s+"))
+icecream_data %>%
+distinct(product_name) %>%
+drop_na() %>% list()
+strsplit(product_list," ")[[1]]
+product_list <- icecream_data %>%
+distinct(product_name) %>%
+drop_na() %>% list() %>%
+as.character()
+strsplit(product_list," ")[[1]]
+product_list <- icecream_data %>%
+distinct(product_name) %>%
+drop_na() %>%
+as.character()
+temp <- unlist(strsplit(product_list, split = "\\s+"))
+temp
+group$group.no.e <- str_replace_all(group$group, "e", "")
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+icecream_data$brand <- str_replace_all(icecream_data$brand, any(!product_name %in% brands_list), brands_list)
+icecream_data$brand <- str_replace_all(icecream_data$brand, any(!icecream_data$brand %in% icecream_data$brands_list), brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand_flag = is.na(brand) == T & any(!product_name %in% brands_list))
+fix_brand_column
+strsplit(product_list," ")[[1]]
+temp <- unlist(strsplit(product_list, split = "\\s+"))
+temp
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand))
+fix_brand_column
+brands_list
+class(brands_list)
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand)) %>%
+mutate(brand = ifelse(test = brand == product_name,
+str_replace_all(string = brand, pattern =  brands_list, replacement =  brands_list), brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand)) %>%
+mutate(brand = ifelse(test = brand == product_name,
+str_replace_all(string = brand, pattern =  brands_list, replacement =  brands_list), brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand)) %>%
+mutate(brand = ifelse(test = brand == product_name,
+str_replace_all(string = brand, pattern =  brands_list, replacement =  brands_list), thing))
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand)) %>%
+mutate(brand = ifelse(test = brand == product_name,
+str_replace_all(string = brand, pattern =  brands_list, replacement =  brands_list), "thing"))
+fix_brand_column
+icecream_data$brand[grep(brands_list, icecream_data$brand)] <- icecream_data$brand
+icecream_data
+icecream_data$brand
+icecream_data
+icecream_data[!product_name %in% brands_list == T]
+icecream_data[!icecream_data$product_name %in% brands_list == T]
+icecream_data[,!icecream_data$product_name %in% brands_list == T]
+icecream_data[!icecream_data$product_name %in% brands_list == T,]
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = product_name,
+no = brand))
+fix_brand_column
+fix_brand_column[!icecream_data$product_name %in% brands_list == T,]
+icecream_data$brand[grep(brands_list, icecream_data)] <- icecream_data$brand
+icecream_data$brand
+icecream_data$brand[grep(brands_list, fix_brand_column)] <- ibrands_list
+icecream_data$brand[grep(brands_list, fix_brand_column)] <- brands_list
+brands_list
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = str_replace_all(string = brand,
+pattern =  brands_list,
+replacement =  brands_list),
+no = brand))
+fix_brand_column
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character() %>%
+list()
+brands_list
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+yes = str_replace_all(string = brand,
+pattern =  brands_list,
+replacement =  brands_list),
+no = brand))
+branded <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% branded == T,
+yes = str_replace_all(string = brand,
+pattern =  brands_list,
+replacement =  brands_list),
+no = brand))
+branded <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character() %>%
+list()
+class(brands_list)
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% branded == T,
+yes = str_replace_all(string = brand,
+pattern =  branded,
+replacement =  brands_list),
+no = brand))
+fix_brand_column <- icecream_data %>%
+mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% branded == T,
+yes = str_replace_all(string = brand,
+pattern =  branded,
+replacement =  branded),
+no = brand))
+install.packages("qdap")
+install.packages("qdap")
+library(tidyverse)
+library(qdap)
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+library(tidyverse)
+library(qdap)
+library(tidyverse)
+library(qdap)
+library(tidyverse)
+library(qdap)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na() %>%
+as.character()
+brands_list <- icecream_data %>%
+distinct(brand) %>%
+drop_na()
+brands_list <- icecream_data %>%
+dplyr::distinct(brand) %>%
+drop_na()
+icecream_data %>%
+na.omit(product_name)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+distinct(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+dplr::distinct(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+dpylr::distinct(search_term)
+install.packages("dplyr")
+library(tidyverse)
+library(qdap)
+library(dplyr)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+dpylr::distinct(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+dpylr::unique(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+unique(search_term)
+library(tidyverse)
+library(qdap)
+library(dplyr)
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+unique(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+unique(search_term)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+distinct(retailer)
+# Checking if there is any NA values in product_name variable
+any(is.na(icecream_data$product_name))
+icecream_data %>%
+na.omit(product_name)
+install.packages("magrittr")

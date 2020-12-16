@@ -1,0 +1,31 @@
+"0","```r
+
+    espn_url <- \"https://www.espn.co.uk/football/commentary?gameId=447042\"
+    espn_webpage <- read_html(espn_url)
+    
+    espn_commentary <- espn_webpage %>%
+      html_nodes(\"#match-commentary-1-tab-1 .game-details\") %>% 
+      html_text() %>% 
+      str_remove_all(\"\n    \t\") %>% 
+      str_remove_all(\"\n    \")
+    
+    espn_mins <- espn_webpage %>%
+      html_nodes(\"#match-commentary-1-tab-1 .time-stamp\") %>% 
+      html_text() 
+    
+    espn_home_team_name <- espn_webpage %>%
+      html_nodes(\"#gamepackage-soccer-timeline .home .team-name\") %>% 
+      html_text() 
+      
+    espn_away_team_name <- espn_webpage %>%
+      html_nodes(\"#gamepackage-soccer-timeline .away .team-name\") %>% 
+      html_text() 
+    
+    espn_com_tibble <- tibble(espn_commentary, espn_mins, espn_home_team_name, espn_away_team_name) %>% 
+      mutate(espn_mins = str_remove_all(espn_mins, \"'\")) %>% 
+      rename(mins = espn_mins) %>% 
+      mutate()
+    
+    
+    
+```"

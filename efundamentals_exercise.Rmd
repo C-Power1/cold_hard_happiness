@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(qdap)
+library(dplyr)
+library(magrittr)
+library(kutils)
+library(stringi)
+library(gsubfn)
+library(glue)
+```
+
+```{r}
+icecream_data <- read_csv("bi-interview-exercise-icecream.csv")
+
+```
+
+Dealing with NAs
+
+```{r}
+# Checking if there is any NA values in product_name variable 
+
+any(is.na(icecream_data$product_name))
+
+icecream_data %>%
+  distinct(product_name)
+
+icecream_data %>%
+  distinct(search_term)
+
+icecream_data %>%
+  na.omit(product_name)
+
+```
+
+Cleaning the Brand Variable
+
+
+```{r}
+
+brands_list <- icecream_data %>%
+  distinct(brand) %>% 
+  drop_na()
+
+fix_brand_column <- icecream_data %>% 
+  mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
+                        yes = product_name,
+                        no = brand))
+
+#   mutate(brand = gsub(".*Ben & Jerry's.*", "Ben & Jerry's", brand))
+
+```
+
+
+
+```{r}
+
+# Unique brands in dataset
+
+icecream_data %>% 
+  distinct(brand)
+
+pattern <- c("Ben & Jerry's",
+             "YooMoo",
+             "Carte D'Or",
+             "Wall's",
+             "Magnum",
+             "Kelly's of Cornwall Cornish Parlour",
+             "ASDA",
+             "Nuii",
+             "Nestle",
+             "Twister",
+             "Calippo",
+             "Solero",
+             "Halotop",
+             "Mini Milk",
+             "Haagen-Dazs",
+             "Kinder Ice Cream",
+             "Mars", "Snickers", "Oreo", "Cadbury", "Cornetto", "Del Monte", "Vimto", "R Whites", "Feast", "Mackie's of Scotland", "Franks", "Swedish Glace", "Jude’s", "Oppo", "Remeo", "Booja Booja", "Morrisons", "Other", "Little Moons", "Iceland", "Daim", "Mr Freeze", "Green & Black's", "Alpro", "The Coconut Collaborative", "Sainsbury's", "Skittles", "Tesco", "Pip Organic", "Jubbly", "Claudi & Fin", "Waitrose", "Lotus", "Yeo Valley", "Norfolk County", "Fravocado", "Grom", "Skinny Cow", "Whole Creations", "Franks Ice Cream", "Yorica", "Ice Cream Union", "Guuud")
+
+
+replacement <- pattern
+
+
+pattern <- paste(".*", pattern, ".*", sep="")
+
+replacement <- paste(".*", pattern, ".*", sep="")
+
+fix_brand_column$brand <- mgsub(pattern = pattern, replacement = replacement, x = fix_brand_column$brand)
+
+
+fix_brand_column1 <- fix_brand_column %>% 
+  mutate(brand = str_remove_all(brand, "[\\.*]"))
+
+fix_brand_column1 %>% 
+  distinct(brand)
+```
+
+
+

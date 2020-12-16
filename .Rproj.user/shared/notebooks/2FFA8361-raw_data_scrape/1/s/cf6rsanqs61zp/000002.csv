@@ -1,0 +1,38 @@
+"0","```r
+first_season <- read_excel(\"2015-2016v5.xlsx\") %>%
+  mutate(url_text_comm = gsub(\"[[:punct:]]\", \"\", url_text_comm)) %>%
+  mutate(url_text_comm = gsub(\"\\E+[0-9]\", \"\", url_text_comm)) %>% 
+  mutate(id = 1:length(url_text_comm))
+
+first_season_split <- first_season %>% 
+ slice(1:5)
+
+first_season_split2 <- first_season %>% 
+ slice(6:10)
+
+first_season_split3 <- first_season %>% 
+slice(11:20)
+
+first_season_split4 <- first_season %>% 
+slice(21:35)
+
+first_season_split5 <- first_season %>% 
+slice(36:55)
+
+first_season_split6 <- first_season %>% 
+slice(56:80)
+
+first_season_split7 <- first_season %>% 
+slice(81:100)
+
+first_season_split8 <- first_season %>% 
+slice(101:121) %>% 
+  mutate(url_text_comm = ifelse(url_text_comm == \"35201468\", \"35166006\" , url_text_comm))
+
+first_season_split9 <- first_season %>% 
+slice(122:150)
+
+first_season_split10 <- first_season %>% 
+slice(151:180)
+
+```"
