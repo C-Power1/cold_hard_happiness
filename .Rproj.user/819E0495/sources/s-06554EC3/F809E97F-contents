@@ -39,30 +39,28 @@ icecream_data %>%
 
 Cleaning the Brand Variable
 
-
 ```{r}
+# Checking all unique brands currently present in brand column (minus NA)
 
-brands_list <- icecream_data %>%
+brands_list <- icecream_data %>% 
   distinct(brand) %>% 
   drop_na()
+
+
+# Replacing brand name with product name for NA values
 
 fix_brand_column <- icecream_data %>% 
   mutate(brand = ifelse(test = is.na(brand) == T & !product_name %in% brands_list == T,
                         yes = product_name,
-                        no = brand))
-
-#   mutate(brand = gsub(".*Ben & Jerry's.*", "Ben & Jerry's", brand))
-
+                        no = brand)) 
 ```
 
 
 
 ```{r}
 
-# Unique brands in dataset
-
-icecream_data %>% 
-  distinct(brand)
+# Creating list of unique brands present in brand column
+# list(brand_list) doesn't work with mgsub() function for some reason
 
 pattern <- c("Ben & Jerry's",
              "YooMoo",
@@ -80,25 +78,390 @@ pattern <- c("Ben & Jerry's",
              "Mini Milk",
              "Haagen-Dazs",
              "Kinder Ice Cream",
-             "Mars", "Snickers", "Oreo", "Cadbury", "Cornetto", "Del Monte", "Vimto", "R Whites", "Feast", "Mackie's of Scotland", "Franks", "Swedish Glace", "Jude’s", "Oppo", "Remeo", "Booja Booja", "Morrisons", "Other", "Little Moons", "Iceland", "Daim", "Mr Freeze", "Green & Black's", "Alpro", "The Coconut Collaborative", "Sainsbury's", "Skittles", "Tesco", "Pip Organic", "Jubbly", "Claudi & Fin", "Waitrose", "Lotus", "Yeo Valley", "Norfolk County", "Fravocado", "Grom", "Skinny Cow", "Whole Creations", "Franks Ice Cream", "Yorica", "Ice Cream Union", "Guuud")
+             "Mars",
+             "Snickers",
+             "Oreo",
+             "Cadbury",
+             "Cornetto",
+             "Del Monte",
+             "Vimto",
+             "R Whites",
+             "Feast",
+             "Mackie's of Scotland",
+             "Franks",
+             "Swedish Glace",
+             "Jude’s",
+             "Oppo",
+             "Remeo",
+             "Booja Booja",
+             "Morrisons",
+             "Other",
+             "Little Moons",
+             "Iceland",
+             "Daim",
+             "Mr Freeze",
+             "Green & Black's",
+             "Alpro",
+             "The Coconut Collaborative",
+             "Sainsbury's",
+             "Skittles",
+             "Tesco",
+             "Pip Organic",
+             "Jubbly",
+             "Claudi & Fin",
+             "Waitrose",
+             "Lotus",
+             "Yeo Valley",
+             "Norfolk County",
+             "Fravocado",
+             "Grom",
+             "Skinny Cow",
+             "Whole Creations",
+             "Franks Ice Cream",
+             "Yorica",
+             "Ice Cream Union",
+             "Guuud")
 
 
 replacement <- pattern
 
-
-pattern <- paste(".*", pattern, ".*", sep="")
-
-replacement <- paste(".*", pattern, ".*", sep="")
-
-fix_brand_column$brand <- mgsub(pattern = pattern, replacement = replacement, x = fix_brand_column$brand)
+pattern <- paste(".*", pattern, ".*", sep="") 
 
 
-fix_brand_column1 <- fix_brand_column %>% 
-  mutate(brand = str_remove_all(brand, "[\\.*]"))
+fix_brand_column$brand <- mgsub(pattern = pattern, replacement = replacement, x = fix_brand_column$brand) #searches through brands and replaces those that match brand strings from pattern with replacement list
 
-fix_brand_column1 %>% 
-  distinct(brand)
 ```
 
 
+```{r}
+
+brands_to_be_fixed <- fix_brand_column %>% 
+  filter(!brand %in% brands_list$brand)
+
+flavours <- c("Chocolate|chocolate",
+              "Vanilla",
+              "Chocolate Mint",
+              "Peanut Butter",
+              "Strawberry|strawberry",
+              "Watermelon",
+              "White Chocolate",
+              "Fruit",
+              "Salted Caramel",
+              "Liquorice",
+              "Caramel",
+              "Raspberry",
+              "mangoes",
+              "Custard",
+              "Lemon",
+              "Toffee",
+              "Honey",
+              "Peach",
+              "Mango",
+              "Limone|Lemons|Lemon",
+              "Blackcurrant",
+              "Brownie",
+              "Rhubarb",
+              "Banana",
+              "Prune",
+              "Coconut",
+              "Apricot",
+              "Passion",
+              "Mint",
+              "Peanut",
+              "Clotted Cream",
+              "Hazelnut",
+              "Milk Chocolate",
+              "Pistachio",
+              "Salted",
+              "Almond",
+              "Pecan",
+              "Cheese",
+              "Ginger Spice",
+              "Cheezecake|Cheesecake|Cheesecakes",
+              "Carrot",
+              "Honeycomb",
+              "Mascarpone",
+              "Blackberry")
+  
+
+remove_flavours <- fix_brand_column %>% 
+  mutate(brand = ifelse(!brand %in% brands_list$brand, word(brand, start = 1L, end = 3L), brand)) # Subsetting brand strings
+  
+remove_flavours$brand <- ifelse(!remove_flavours$brand %in% brands_list$brand,
+                        str_remove_all(remove_flavours$brand, paste(flavours, collapse = "|")), remove_flavours$brand)
+  
+  
+# remove_numbers <- remove_flavours %>% 
+#   mutate(brand = str_remove_all(brand,
+#                                 "[:digit:]"))
+
+
+other_brands <- c("Birds Eye",
+                  "Häagen-Dazs",
+                  "Carte D'or",
+                  "Actimel",
+                  "Muller",
+                  "Maltesers",
+                  "Activia",
+                  "Viennetta",
+                  "Chupa Chups",
+                  "KitKat",
+                  "Jude's",
+                  "Milkybar",
+                  "Onken",
+                  "Rowntree's",
+                  "Oykos",
+                  "Kiddylicious",
+                  "Sambucol",
+                  "Swizzels",
+                  "Henry Goode's",
+                  "FAGE",
+                  "SlimFast",
+                  "Müller",
+                  "OXO",
+                  "Munch Bunch",
+                  "Kulfi Ice",
+                  "Rachel's Organic",
+                  "KitchenCraft",
+                  "Fage",
+                  "Langmead Herbs",
+                  "Barratt",
+                  "The Collective",
+                  "Haagen Dazs",
+                  "Ambrosia",
+                  "Booja-Booja",
+                  "Walkers",
+                  "innocent",
+                  "Fuzzyard",
+                  "Go Ahead",
+                  "Harpic",
+                  "Pulsin",
+                  "Kinnerton",
+                  "Strepsils",
+                  "Totally Sweet",
+                  "Butterkist",
+                  "Chicago Town",
+                  "Comvita",
+                  "Fox's",
+                  "Gloriously Grown",
+                  "Panda",
+                  "Rimmel London",
+                  "Ricola",
+                  "Anchor",
+                  "LoveLife",
+                  "Seedlip",
+                  "Wildlife",
+                  "Baileys",
+                  "Gordon's",
+                  "Reese's",
+                  "Yupi",
+                  "Warburtons",
+                  "Green & Blacks",
+                  "Maoam",
+                  "Philadelphia",
+                  "Quorn",
+                  "Lanacane",
+                  "Tarquin's",
+                  "Garnier",
+                  "Koko",
+                  "Mackie's",
+                  "Tala",
+                  "Unibond",
+                  "BULK",
+                  "Cazcabel",
+                  "Eskimo Ice",
+                  "Sipsmith",
+                  "Graham's",
+                  "Gu",
+                  "TOMY",
+                  "Extrême",
+                  "McCain",
+                  "Pritt",
+                  "Sistema",
+                  "Haribo",
+                  "Naturya",
+                  "Kirsty's",
+                  "Ichoc",
+                  "MasterClass",
+                  "Benecol",
+                  "Cheetos",
+                  "Dove",
+                  "Bonne Maman",
+                  "Breville",
+                  "L'Oreal",
+                  "Russell Hobbs",
+                  "Diprobase",
+                  "Ecover",
+                  "Frubes",
+                  "Persil",
+                  "Vanish",
+                  "Ariel",
+                  "Comfort",
+                  "IRN-BRU",
+                  "Monin",
+                  "Bold",
+                  "Surf",
+                  "Fairy",
+                  "Lenor",
+                  "Walls",
+                  "Sambazon",
+                  "Smarties",
+                  "Danone",
+                  "E45",
+                  "Dylon",
+                  "Nestlé",
+                  "Bahlsen",
+                  "Addis",
+                  "Bomb Cosmetics",
+                  "Epaderm",
+                  "Higgidy",
+                  "Malfy Gin",
+                  "Max Factor",
+                  "Polly Pocket",
+                  "Sage",
+                  "Woolite",
+                  "Cauldron",
+                  "Fosters",
+                  "Optimum Nutrition",
+                  "Goodlife",
+                  "Gü",
+                  "UniBond",
+                  "tella",
+                  "L'Oréal",
+                  "Linda McCartney",
+                  "Galaxy",
+                  "Hellmann's",
+                  "Jacob's",
+                  "Neutrogena",
+                  "Pizza Express",
+                  "Play-Doh",
+                  "Unearthed", 
+                  "Warburtons",
+                  "Wrigley's",
+                  "Nescafé",
+                  "Petits Filous",
+                  "Schär",
+                  "Smint",
+                  "Uncle Ben's",
+                  "REMEO GELATO",
+                  "UNCLE BEN'S",
+                  "Uncle Bens",
+                  "No.1")
+
+
+replacement <- other_brands
+
+pattern <- paste(".*", other_brands, ".*", sep="") 
+
+
+remove_flavours$brand <- mgsub(pattern = pattern, replacement = replacement, x = remove_flavours$brand) #searches through brands and replaces those that match brand strings from pattern with replacement list
+
+
+recode_doubles_and_misspellings <- remove_flavours %>%
+  mutate(brand = case_when(
+    brand == "Ben And Jerry's" ~ "Ben & Jerry's",
+    brand == "Booja-Booja" ~ "Booja Booja",
+    brand == "Carte D'or" ~ "Carte D'Or",
+    brand == "GINGER PEOPLE (THE" ~ "The Ginger People",
+    brand == "Chupa Chupa Melody" ~ "Chupa Chups",
+    brand == "DP Soda Crystals" ~ "Dri-Pak",
+    brand == "Fage" ~ "FAGE",
+    brand == "Franks" ~ "Frank's Ice Cream",
+    brand == "Green & Blacks" ~ "Green & Black's",
+    brand == "Gu" ~ "Gü",
+    brand == "Halotop" ~ "Halo Top",
+    brand == "BHARIBO Starmix Sweets" ~ "Haribo",
+    brand == "Jude's " ~ "Jude’s",
+    brand == "Jude's" ~ "Jude’s",
+    brand == "Kinerton " ~ "Kinnerton",
+    brand == "Linda McCartney" ~ "Linda McCartney's",
+    brand == "Malfy Con" ~ "Malfy Gin",
+    brand == "Maynards Bassetts Wine" ~ "Maynards Bassetts",
+    brand == "Muller" ~ "Müller",
+    brand == "Nestle" ~ "Nestlé",
+    brand == "Snickers" ~ "SNICKERS®",
+    brand == "tella" ~ "Fruitella",
+    brand == "Rowntrees 4" ~ "Rowntree's",
+    brand == "Walls" ~ "Wall's",
+    brand == "Halo Top	" ~ "Halo Top",
+    brand == "HARIBO Starmix Sweets" ~ "Haribo",
+    brand == "RESCUE Pastilles" ~ "Rescue Pastilles",
+    brand == "REMEO GELATO" ~ "Remeo",
+    brand == "Schar 4 Gluten" ~ "Schär",
+    brand == "L'Oreal" ~ "L'Oréal",
+    TRUE ~ brand))
+
+recode_doubles_and_misspellings %>%
+  distinct(brand) %>% 
+  arrange(brand)
+```
+
+
+
+```{r}
+
+
+haagen_dazs_misspellings <- c("Haagen - Dazs",
+                              "Haagen Daz ",
+                              "Haagen Dazs",
+                              "Häagen Dazs ",
+                              "Häagen Dazs Favourites",
+                              "Haagen-Dazs")
+
+rachels_organic_to_fix <- c("Rachel'S Organic Greek",
+                            "Rachel's Luscious Multipack")
+
+
+uncle_bens_misspellings <- c("UNCLE BEN'S",
+                             "Uncle Bens")
+
+
+rescue_pastilles_misspelling <- c("RESCUE Pastilles	", "Rescue Pastilles ,") 
+
+
+remove_further_misspellings <- recode_doubles_and_misspellings %>% 
+  mutate(brand = if_else(brand %in% haagen_dazs_misspellings, "Häagen-Dazs", brand),
+         brand = if_else(brand %in% rachels_organic_to_fix, "Rachel's Organic", brand),
+         brand = if_else(brand %in% uncle_bens_misspellings, "Uncle Ben's", brand),
+         brand = if_else(brand %in% rescue_pastilles_misspelling, "Rescue Pastilles", brand))
+
+
+product_descriptors_to_remove <- c("Yogurt",
+                  "Belgian",
+                  "Drink",
+                  "Gluten Free",
+                  "Ice Cream",
+                  "Classic|Classics",
+                  "No Added",
+                  "Cone",
+                  "Special",
+                  "Mini",
+                  "Fat Free",
+                  "Greek",
+                  "100%",
+                  "Californian",
+                  "Sugar Free",
+                  "Sicilian",
+                  "Sorbet",
+                  "Dairy Free",
+                  "original",
+                  "Natural",
+                  "Multipack",
+                  "crackin",
+                  " Sherbet s")
+
+getting_rid_of_whitespace <- remove_further_misspellings %>%
+  mutate(brand = trimws(brand, which = "right"))
+
+
+remove_further_misspellings %>% 
+  distinct(brand) %>% 
+  arrange(brand)
+
+# Country Style 6
+# El Dorado 12
+# E45
+# No.1				
+# Nobbly Bobbly 4
+```
 
