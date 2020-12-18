@@ -3,7 +3,7 @@
     "path": "~/Documents/data_projects/efundamentals_exercise/efundamentals_exercise.Rmd",
     "project_path": "efundamentals_exercise.Rmd",
     "type": "r_markdown",
-    "hash": "3136777657",
+    "hash": "1285299195",
     "contents": "",
     "dirty": false,
     "created": 1608048514457.0,
@@ -12,15 +12,15 @@
     "properties": {
         "tempName": "Untitled1",
         "chunk_output_type": "inline",
-        "cursorPosition": "501,18",
-        "scrollLine": "495"
+        "cursorPosition": "567,0",
+        "scrollLine": "551"
     },
     "folds": "",
-    "lastKnownWriteTime": 1608226062,
+    "lastKnownWriteTime": 1608297729,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1608226062180,
+    "last_content_update": 1608297729215,
     "read_only": false,
     "read_only_alternatives": []
 }

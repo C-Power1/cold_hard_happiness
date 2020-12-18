@@ -12,6 +12,7 @@ library(kutils)
 library(stringi)
 library(gsubfn)
 library(glue)
+library(naniar)
 ```
 
 ```{r}
@@ -505,5 +506,77 @@ rowntrees_and_rescue_clean %>%
   distinct(brand) %>% 
   arrange(brand)
 
+rowntrees_and_rescue_clean
+
+getting_rid_of_whitespace <- rowntrees_and_rescue_clean %>%
+  mutate(brand = trimws(brand, which = "right", "left"))
+
 ```
+
+
+
+```{r}
+
+# Dealing with the NA values in brand produced by original string split 
+
+brand_column_cleaned <- getting_rid_of_whitespace %>% 
+  mutate(brand = ifelse(test = is.na(brand) == T,
+                        yes = word(product_name, start = 1L, end = 1L), # first word in product_name is brand for majority
+                        no = brand)) %>% 
+  mutate(brand = ifelse(test = brand == "Essential",
+                        yes = "Waitrose",
+                        no = brand))
+```
+
+Creating a Promotion Flag
+
+```{r}
+
+promotion_flag_added <- brand_column_cleaned %>% 
+  mutate(promotion_flag = ifelse(is.na(promotion), FALSE, TRUE))
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+no_of_ASDA_rankings <- promotion_flag_added %>%
+  filter(retailer == "ASDA") %>% 
+  group_by(brand) %>%
+  summarise(num_of_rankings = sum(!is.na(rank))) %>% 
+  arrange(desc(num_of_rankings))
+
+promotion_flag_added %>% 
+  filter(retailer == "ASDA") %>%
+  filter(search_term == "ben & jerry's") %>% 
+  group_by(brand, search_term) %>%
+  summarise(num_of_rankings_asda = sum(!is.na(rank)))
+  
+  promotion_flag_added %>% 
+  filter(search_term == "ben & jerry's") %>% 
+  filter(retailer == "Sainsburys") %>% 
+  group_by(product_name, date) %>%
+  summarise(price)
+  
+  promotion_flag_added %>% 
+  group_by(product_name, date) %>%
+    summarise(promotion_flag)
+  
+  promotion_flag_added %>% 
+  filter(brand == "Ben & Jerry's") %>% 
+  filter(str_detect(product_name, "Cookie Dough Ice Cream"))
+  
+  
+```
+
+
+
+
+
+
+
+
 
